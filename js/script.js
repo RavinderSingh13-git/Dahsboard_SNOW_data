@@ -54,7 +54,8 @@ function renderTable(data) {
                 currentColumnIndex = index;
             }
             const sortedData = sortTableByColumn(data, index, sortOrder);
-            renderTable(sortedData); // Re-render table with sorted data
+             /////////// Re-render table with sorted data
+            renderTable(sortedData);
         });
 
         tableHeader.appendChild(th);
@@ -108,11 +109,9 @@ document.getElementById('btn-pie-chart').addEventListener('click', function() {
 
 function generateChart(type) {
     const ctx = document.getElementById('chartContainer').getContext('2d');
-
-    // Example: Count of items per BU name
     const buNameCounts = {};
 
-    // Assuming the "BU name" column is the 7th column (index 6)
+    //////Put BU name column here...
     tableData.slice(1).forEach(row => {
         const buName = row[6];
         if (buName) {
@@ -141,7 +140,8 @@ function generateChart(type) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // Allow the chart to be resized
+            ///////////Allow the chart to be resized
+            maintainAspectRatio: false, 
             plugins: {
                 legend: {
                     display: true,
@@ -154,7 +154,8 @@ function generateChart(type) {
                     }
                 }
             },
-            aspectRatio: type === 'pie' ? 1 : undefined, // Maintain circular aspect for pie chart
+            ///////////Maintain circular aspect for pie chart
+            aspectRatio: type === 'pie' ? 1 : undefined, 
             layout: {
                 padding: {
                     top: 10,
