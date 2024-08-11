@@ -19,8 +19,8 @@ document.getElementById('input-excel').addEventListener('change', function(event
             // Render data to the table
             renderTable(tableData);
 
-            // Enable and show the chart type selection button
-            document.getElementById('btn-select-chart').style.display = 'inline-block';
+            // Show the chart type selection buttons
+            document.querySelector('.btn-chart-container').style.display = 'block';
         };
         
         reader.readAsArrayBuffer(file);
@@ -93,25 +93,21 @@ function sortTableByColumn(data, columnIndex, order) {
     return [header, ...sortedRows];
 }
 
-document.getElementById('btn-select-chart').addEventListener('click', function() {
-    $('#chartTypeModal').modal('show');
-});
-
 document.getElementById('btn-bar-chart').addEventListener('click', function() {
     generateChart('bar');
-    $('#chartTypeModal').modal('hide');
 });
 
 document.getElementById('btn-pie-chart').addEventListener('click', function() {
     generateChart('pie');
-    $('#chartTypeModal').modal('hide');
 });
 
 function generateChart(type) {
-    const ctx = document.getElementById('chartContainer').getContext('2d');
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    const ctxPie = document.getElementById('pieChart').getContext('2d');
+    
     const buNameCounts = {};
 
-    //////Put BU name column here...
+    // Assuming "BU name" is in the 7th column (index 6)
     tableData.slice(1).forEach(row => {
         const buName = row[6];
         if (buName) {
@@ -122,46 +118,88 @@ function generateChart(type) {
     const buNames = Object.keys(buNameCounts);
     const buCounts = Object.values(buNameCounts);
 
-    new Chart(ctx, {
-        type: type,
-        data: {
-            labels: buNames,
-            datasets: [{
-                label: '# of Products by BU',
-                data: buCounts,
-                backgroundColor: type === 'pie' ? 
-                    ['rgba(54, 162, 235, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(75, 192, 192, 0.2)'] : 
-                    ['rgba(54, 162, 235, 0.2)'],
-                borderColor: type === 'pie' ? 
-                    ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)'] : 
-                    ['rgba(54, 162, 235, 1)'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            ///////////Allow the chart to be resized
-            maintainAspectRatio: false, 
-            plugins: {
-                legend: {
-                    display: true,
+    // Hide all charts initially
+    document.getElementById('barChart').style.display = 'none';
+    document.getElementById('pieChart').style.display = 'none';
+
+    if (type === 'bar') {
+        document.getElementById('barChart').style.display = 'block';
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: buNames,
+                datasets: [{
+                    label: '# of Products by BU',
+                    data: buCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw;
+                            }
+                        }
+                    }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.label + ': ' + context.raw;
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else if (type === 'pie') {
+        document.getElementById('pieChart').style.display = 'block';
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: buNames,
+                datasets: [{
+                    label: '# of Products by BU',
+                    data: buCounts,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw;
+                            }
                         }
                     }
                 }
-            },
-            ///////////Maintain circular aspect for pie chart
-            aspectRatio: type === 'pie' ? 1 : undefined, 
-            layout: {
-                padding: {
-                    top: 10,
-                    bottom: 10
-                }
             }
-        }
-    });
+        });
+    }
 }

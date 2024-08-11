@@ -15,18 +15,25 @@
             max-height: 80vh;
         }
         .chart-container {
-            width: 40%; /* Adjust width to be smaller */
-            height: 40vh; /* Adjust height to be smaller */
+            width: 50%; /* Adjust width to be smaller */
+            height: 50vh; /* Adjust height to be smaller */
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        #chartContainer {
+        #barChart, #pieChart {
             width: 100% !important; /* Fill container width */
             height: 80% !important; /* Adjust height as needed */
         }
-        #btn-select-chart {
+        #pieChart {
             display: none; /* Initially hidden */
+        }
+        .btn-chart-container {
+            display: none; /* Initially hidden */
+            margin-top: 20px;
+        }
+        .btn-chart {
+            margin: 0 10px; /* Adjust spacing between buttons */
         }
     </style>
 </head>
@@ -37,6 +44,12 @@
         <!-- File input for Excel -->
         <input type="file" id="input-excel" class="form-control mb-4" accept=".xlsx, .xls">
         
+        <!-- Container for chart type selection buttons -->
+        <div class="btn-chart-container text-center">
+            <button id="btn-bar-chart" class="btn btn-info btn-chart">Bar Chart</button>
+            <button id="btn-pie-chart" class="btn btn-info btn-chart">Pie Chart</button>
+        </div>
+
         <!-- Bootstrap row to hold the table and chart -->
         <div class="row">
             <!-- Table on the left side -->
@@ -53,28 +66,8 @@
 
             <!-- Chart on the right side -->
             <div class="col-md-6 chart-container">
-                <canvas id="chartContainer"></canvas>
-            </div>
-        </div>
-
-        <!-- Button to select chart type -->
-        <button id="btn-select-chart" class="btn btn-primary">Select Chart Type</button>
-
-        <!-- Modal for chart type selection -->
-        <div class="modal fade" id="chartTypeModal" tabindex="-1" role="dialog" aria-labelledby="chartTypeModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="chartTypeModalLabel">Select Chart Type</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <button id="btn-pie-chart" class="btn btn-info">Pie Chart</button>
-                        <button id="btn-bar-chart" class="btn btn-info">Bar Chart</button>
-                    </div>
-                </div>
+                <canvas id="barChart"></canvas>
+                <canvas id="pieChart"></canvas> <!-- Hidden initially -->
             </div>
         </div>
     </div>
