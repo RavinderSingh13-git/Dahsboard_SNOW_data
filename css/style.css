@@ -1,4 +1,3 @@
-/* Example CSS rules */
 body {
     background-color: #f8f9fa;
 }
@@ -7,21 +6,38 @@ h1 {
     color: #007bff;
 }
 
+/* Ensure the table and chart do not overlap */
+.table-container {
+    overflow-x: auto;
+    max-height: 80vh;
+}
 
-    /* Ensure the table and chart do not overlap */
-    .table-container {
-        overflow-x: auto;
-        max-height: 80vh;
-    }
-    .chart-container {
-        width: 40%; /* Adjust width to be smaller */
-        height: 40vh; /* Adjust height to be smaller */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    #chartContainer {
-        width: 100% !important; /* Fill container width */
-        height: 80% !important; /* Adjust height as needed */
-    }
+.chart-container {
+    width: 50%; /* Adjust width to be smaller */
+    height: 50vh; /* Adjust height to be smaller */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
+#barChart, #pieChart, #marketChart {
+    width: 100% !important; /* Fill container width */
+    height: 80% !important; /* Adjust height as needed */
+}
+
+#pieChart, #marketChart {
+    display: none; /* Initially hidden */
+}
+
+.btn-chart-container {
+    display: none; /* Initially hidden */
+    margin-top: 20px;
+}
+
+.btn-chart {
+    margin: 0 10px; /* Adjust spacing between buttons */
+}
+
+#input-market-excel {
+    display: none; /* Hide initially */
+}
