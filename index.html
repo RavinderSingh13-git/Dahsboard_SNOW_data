@@ -15,8 +15,8 @@
             max-height: 80vh;
         }
         .chart-container {
-            width: 50%; /* Adjust width to be smaller */
-            height: 50vh; /* Adjust height to be smaller */
+            width: 40%; /* Adjust width to be smaller */
+            height: 40vh; /* Adjust height to be smaller */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -35,9 +35,6 @@
         .btn-chart {
             margin: 0 10px; /* Adjust spacing between buttons */
         }
-        #input-market-excel {
-            display: none; /* Hide initially */
-        }
     </style>
 </head>
 <body>
@@ -46,14 +43,12 @@
 
         <!-- File input for Excel -->
         <input type="file" id="input-excel" class="form-control mb-4" accept=".xlsx, .xls">
-        <!-- File input for Market Excel -->
-        <input type="file" id="input-market-excel" class="form-control mb-4" accept=".xlsx, .xls">
-
+        
         <!-- Container for chart type selection buttons -->
         <div class="btn-chart-container text-center">
             <button id="btn-bar-chart" class="btn btn-info btn-chart">Bar Chart</button>
             <button id="btn-pie-chart" class="btn btn-info btn-chart">Pie Chart</button>
-            <button id="btn-compare-market" class="btn btn-warning btn-chart">Compare with Market Trend</button>
+            <button id="btn-compare-market" class="btn btn-info btn-chart">Compare with Market Trend</button>
         </div>
 
         <!-- Bootstrap row to hold the table and chart -->

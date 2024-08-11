@@ -1,5 +1,10 @@
 let tableData = [];
-let marketData = [];
+let marketData = [
+    ["product", "Market latest version"],
+    ["monitoring agent", 6],
+    ["vim", 4],
+    ["sharepoint", 3]
+];
 
 document.getElementById('input-excel').addEventListener('change', function(event) {
     const file = event.target.files[0];
@@ -22,30 +27,6 @@ document.getElementById('input-excel').addEventListener('change', function(event
 
             // Show the chart type selection buttons
             document.querySelector('.btn-chart-container').style.display = 'block';
-
-            // Show the market file upload button
-            document.getElementById('input-market-excel').style.display = 'block';
-        };
-        
-        reader.readAsArrayBuffer(file);
-    }
-});
-
-document.getElementById('input-market-excel').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    
-    if (file) {
-        const reader = new FileReader();
-        
-        reader.onload = function(event) {
-            const data = new Uint8Array(event.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            
-            // Assuming the first sheet
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            
-            // Convert sheet to JSON
-            marketData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
         };
         
         reader.readAsArrayBuffer(file);
@@ -79,6 +60,7 @@ function renderTable(data) {
                 currentColumnIndex = index;
             }
             const sortedData = sortTableByColumn(data, index, sortOrder);
+             /////////// Re-render table with sorted data
             renderTable(sortedData);
         });
 
@@ -113,6 +95,7 @@ function sortTableByColumn(data, columnIndex, order) {
         }
     });
 
+    // Return the header row and sorted rows
     return [header, ...sortedRows];
 }
 
@@ -134,8 +117,9 @@ function generateChart(type) {
     
     const buNameCounts = {};
 
+    // Assuming "BU name" is in the 7th column (index 6)
     tableData.slice(1).forEach(row => {
-        const buName = row[0]; // Assuming "BU" is in the 1st column (index 0)
+        const buName = row[6];
         if (buName) {
             buNameCounts[buName] = (buNameCounts[buName] || 0) + 1;
         }
@@ -147,6 +131,7 @@ function generateChart(type) {
     // Hide all charts initially
     document.getElementById('barChart').style.display = 'none';
     document.getElementById('pieChart').style.display = 'none';
+    document.getElementById('marketChart').style.display = 'none';
 
     if (type === 'bar') {
         document.getElementById('barChart').style.display = 'block';
@@ -155,14 +140,21 @@ function generateChart(type) {
             data: {
                 labels: buNames,
                 datasets: [{
-                    label: 'BU Count',
+                    label: '# of Products by BU',
                     data: buCounts,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                    },
+                },
                 scales: {
                     y: {
                         beginAtZero: true
@@ -177,12 +169,35 @@ function generateChart(type) {
             data: {
                 labels: buNames,
                 datasets: [{
-                    label: 'BU Distribution',
+                    label: '# of Products by BU',
                     data: buCounts,
-                    backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],
-                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
                     borderWidth: 1
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                    },
+                }
             }
         });
     }
@@ -190,68 +205,64 @@ function generateChart(type) {
 
 function compareWithMarket() {
     const ctxMarket = document.getElementById('marketChart').getContext('2d');
-    
-    if (marketData.length === 0) {
-        alert('Please upload market data file first.');
-        return;
-    }
+    const comparisonData = [];
 
-    // Process market data
-    const marketBuNameCounts = {};
-    const versionIndexMarket = marketData[0].indexOf('version');
+    // Create a dictionary for quick lookup of market data
+    const marketDict = marketData.slice(1).reduce((acc, row) => {
+        acc[row[0].toLowerCase()] = row[1];
+        return acc;
+    }, {});
 
-    marketData.slice(1).forEach(row => {
-        const buName = row[0]; // Assuming "BU" is in the 1st column (index 0)
-        const version = row[versionIndexMarket];
-        if (buName) {
-            marketBuNameCounts[buName] = marketBuNameCounts[buName] || { count: 0, version: version };
-            marketBuNameCounts[buName].count += 1;
-        }
-    });
-
-    const userBuNameCounts = {};
-    const versionIndexUser = tableData[0].indexOf('version');
-
+    // Assuming the first column in the Excel sheet is the product name
     tableData.slice(1).forEach(row => {
-        const buName = row[0]; // Assuming "BU" is in the 1st column (index 0)
-        const version = row[versionIndexUser];
-        if (buName) {
-            userBuNameCounts[buName] = userBuNameCounts[buName] || { count: 0, version: version };
-            userBuNameCounts[buName].count += 1;
-        }
+        const productName = row[0].toLowerCase();
+        const productVersion = row[5]; // Assuming the version is in the 6th column (index 5)
+        const marketVersion = marketDict[productName] || 0;
+
+        comparisonData.push({
+            product: productName,
+            productVersion: productVersion,
+            marketVersion: marketVersion
+        });
     });
 
-    const allBuNames = Array.from(new Set([...Object.keys(userBuNameCounts), ...Object.keys(marketBuNameCounts)]));
-    const userCounts = allBuNames.map(name => userBuNameCounts[name]?.count || 0);
-    const marketCounts = allBuNames.map(name => marketBuNameCounts[name]?.count || 0);
+    const products = comparisonData.map(item => item.product);
+    const productVersions = comparisonData.map(item => item.productVersion);
+    const marketVersions = comparisonData.map(item => item.marketVersion);
 
     // Hide all charts initially
     document.getElementById('barChart').style.display = 'none';
     document.getElementById('pieChart').style.display = 'none';
+    document.getElementById('marketChart').style.display = 'none';
+
     document.getElementById('marketChart').style.display = 'block';
 
     new Chart(ctxMarket, {
         type: 'bar',
         data: {
-            labels: allBuNames,
-            datasets: [
-                {
-                    label: 'User Data',
-                    data: userCounts,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Market Data',
-                    data: marketCounts,
-                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    borderWidth: 1
-                }
-            ]
+            labels: products,
+            datasets: [{
+                label: 'Your Product Version',
+                data: productVersions,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Market Version',
+                data: marketVersions,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                },
+            },
             scales: {
                 y: {
                     beginAtZero: true
