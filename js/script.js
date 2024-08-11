@@ -1,7 +1,6 @@
 let tableData = [];
 let marketData = [];
 
-// Handle file input for user's Excel data
 document.getElementById('input-excel').addEventListener('change', function(event) {
     const file = event.target.files[0];
     
@@ -11,10 +10,20 @@ document.getElementById('input-excel').addEventListener('change', function(event
         reader.onload = function(event) {
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Assuming the first sheet
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            // Convert sheet to JSON
             tableData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+            // Render data to the table
             renderTable(tableData);
+
+            // Show the chart type selection buttons
             document.querySelector('.btn-chart-container').style.display = 'block';
+
+            // Show the market file upload button
             document.getElementById('input-market-excel').style.display = 'block';
         };
         
@@ -22,7 +31,6 @@ document.getElementById('input-excel').addEventListener('change', function(event
     }
 });
 
-// Handle file input for market Excel data
 document.getElementById('input-market-excel').addEventListener('change', function(event) {
     const file = event.target.files[0];
     
@@ -32,7 +40,11 @@ document.getElementById('input-market-excel').addEventListener('change', functio
         reader.onload = function(event) {
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Assuming the first sheet
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            // Convert sheet to JSON
             marketData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
         };
         
@@ -40,20 +52,27 @@ document.getElementById('input-market-excel').addEventListener('change', functio
     }
 });
 
-// Render table data
 function renderTable(data) {
     const tableHeader = document.getElementById('table-header');
     const tableBody = document.getElementById('dataTable');
+
+    // Clear existing data
     tableHeader.innerHTML = '';
     tableBody.innerHTML = '';
-    let sortOrder = 'asc';
+
+    // Initialize sorting state
+    let sortOrder = 'asc'; // default sort order
     let currentColumnIndex = -1;
 
+    // Create header row with sorting buttons
     data[0].forEach((header, index) => {
         const th = document.createElement('th');
         th.innerHTML = `${header} <i class="sort-button fas fa-sort"></i>`;
+        
+        // Add click event to header for sorting
         th.addEventListener('click', () => {
             if (currentColumnIndex === index) {
+                // Toggle sort order
                 sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
             } else {
                 sortOrder = 'asc';
@@ -62,9 +81,11 @@ function renderTable(data) {
             const sortedData = sortTableByColumn(data, index, sortOrder);
             renderTable(sortedData);
         });
+
         tableHeader.appendChild(th);
     });
 
+    // Create data rows
     data.slice(1).forEach(row => {
         const tr = document.createElement('tr');
         row.forEach(cell => {
@@ -76,54 +97,63 @@ function renderTable(data) {
     });
 }
 
-// Sort table data by column
 function sortTableByColumn(data, columnIndex, order) {
-    const header = data[0];
-    const rows = data.slice(1);
+    const header = data[0]; // Keep the header row
+    const rows = data.slice(1); // Exclude the header row
+
+    // Sort data based on the selected column and order
     const sortedRows = rows.sort((a, b) => {
         const cellA = a[columnIndex];
         const cellB = b[columnIndex];
+        
         if (order === 'asc') {
             return (cellA > cellB) ? 1 : (cellA < cellB) ? -1 : 0;
         } else {
             return (cellA < cellB) ? 1 : (cellA > cellB) ? -1 : 0;
         }
     });
+
     return [header, ...sortedRows];
 }
 
-// Generate chart based on the selected type
+function hideAllCharts() {
+    document.getElementById('barChart').style.display = 'none';
+    document.getElementById('pieChart').style.display = 'none';
+    document.getElementById('marketChart').style.display = 'none';
+}
+
 document.getElementById('btn-bar-chart').addEventListener('click', function() {
+    hideAllCharts();
     generateChart('bar');
 });
 
 document.getElementById('btn-pie-chart').addEventListener('click', function() {
+    hideAllCharts();
     generateChart('pie');
 });
 
 document.getElementById('btn-compare-market').addEventListener('click', function() {
+    hideAllCharts();
     compareWithMarket();
 });
 
-// Generate chart for user data
 function generateChart(type) {
     const ctxBar = document.getElementById('barChart').getContext('2d');
     const ctxPie = document.getElementById('pieChart').getContext('2d');
-    const buNameCounts = {};
+    
+    const manufacturerCounts = {};
 
     tableData.slice(1).forEach(row => {
-        const manufacturer = row[1]; // Assuming "Manufacturer" is in the 2nd column (index 1)
+        const manufacturer = row[1]; // Assuming Manufacturer is in the 2nd column (index 1)
         if (manufacturer) {
-            buNameCounts[manufacturer] = (buNameCounts[manufacturer] || 0) + 1;
+            manufacturerCounts[manufacturer] = (manufacturerCounts[manufacturer] || 0) + 1;
         }
     });
 
-    const manufacturers = Object.keys(buNameCounts);
-    const counts = Object.values(buNameCounts);
+    const manufacturers = Object.keys(manufacturerCounts);
+    const counts = Object.values(manufacturerCounts);
 
-    document.getElementById('barChart').style.display = 'none';
-    document.getElementById('pieChart').style.display = 'none';
-
+    // Hide all charts initially
     if (type === 'bar') {
         document.getElementById('barChart').style.display = 'block';
         new Chart(ctxBar, {
@@ -164,39 +194,42 @@ function generateChart(type) {
     }
 }
 
-// Compare user data with market data
 function compareWithMarket() {
     const ctxMarket = document.getElementById('marketChart').getContext('2d');
-
+    
     if (marketData.length === 0) {
         alert('Please upload market data file first.');
         return;
     }
 
-    const userBuNameCounts = {};
-    const marketBuNameCounts = {};
-
-    const manufacturerIndexUser = tableData[0].indexOf('Manufacturer');
+    // Process market data
+    const marketManufacturerCounts = {};
     const manufacturerIndexMarket = marketData[0].indexOf('Manufacturer');
-
-    tableData.slice(1).forEach(row => {
-        const manufacturer = row[manufacturerIndexUser];
-        if (manufacturer) {
-            userBuNameCounts[manufacturer] = (userBuNameCounts[manufacturer] || 0) + 1;
-        }
-    });
 
     marketData.slice(1).forEach(row => {
         const manufacturer = row[manufacturerIndexMarket];
         if (manufacturer) {
-            marketBuNameCounts[manufacturer] = (marketBuNameCounts[manufacturer] || 0) + 1;
+            marketManufacturerCounts[manufacturer] = marketManufacturerCounts[manufacturer] || { count: 0 };
+            marketManufacturerCounts[manufacturer].count += 1;
         }
     });
 
-    const allManufacturers = Array.from(new Set([...Object.keys(userBuNameCounts), ...Object.keys(marketBuNameCounts)]));
-    const userCounts = allManufacturers.map(name => userBuNameCounts[name] || 0);
-    const marketCounts = allManufacturers.map(name => marketBuNameCounts[name] || 0);
+    const userManufacturerCounts = {};
+    const manufacturerIndexUser = tableData[0].indexOf('Manufacturer');
 
+    tableData.slice(1).forEach(row => {
+        const manufacturer = row[manufacturerIndexUser];
+        if (manufacturer) {
+            userManufacturerCounts[manufacturer] = userManufacturerCounts[manufacturer] || { count: 0 };
+            userManufacturerCounts[manufacturer].count += 1;
+        }
+    });
+
+    const allManufacturers = Array.from(new Set([...Object.keys(userManufacturerCounts), ...Object.keys(marketManufacturerCounts)]));
+    const userCounts = allManufacturers.map(name => userManufacturerCounts[name]?.count || 0);
+    const marketCounts = allManufacturers.map(name => marketManufacturerCounts[name]?.count || 0);
+
+    // Hide all charts initially
     document.getElementById('barChart').style.display = 'none';
     document.getElementById('pieChart').style.display = 'none';
     document.getElementById('marketChart').style.display = 'block';
