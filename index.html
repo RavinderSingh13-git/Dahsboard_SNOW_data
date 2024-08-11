@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.5">
+    <title>Data Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Ensure the table and chart do not overlap */
+        .table-container {
+            overflow-x: auto;
+            max-height: 80vh;
+        }
+        .chart-container {
+            width: 100%;
+            height: 100%;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+        /* Custom styles for sort buttons */
+        .sort-button {
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-5">
+        <h1 class="text-center">Data Dashboard</h1>
+
+        <!-- File input for Excel -->
+        <input type="file" id="input-excel" class="form-control mb-4" accept=".xlsx, .xls">
+        
+        <!-- Bootstrap row to hold the table and chart -->
+        <div class="row">
+            <!-- Table on the left side -->
+            <div class="col-md-6 table-container">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr id="table-header"></tr>
+                    </thead>
+                    <tbody id="dataTable">
+                        <!-- Data rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Chart on the right side -->
+            <div class="col-md-6 chart-container">
+                <canvas id="chartContainer"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- xlsx library for reading Excel files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="js/script.js"></script>
+</body>
+</html>
