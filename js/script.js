@@ -1,3 +1,5 @@
+let tableData = [];
+
 document.getElementById('input-excel').addEventListener('change', function(event) {
     const file = event.target.files[0];
     
@@ -12,13 +14,13 @@ document.getElementById('input-excel').addEventListener('change', function(event
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             
             // Convert sheet to JSON
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            tableData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
             // Render data to the table
-            renderTable(jsonData);
+            renderTable(tableData);
 
-            // Generate a chart based on the data
-            generateChart(jsonData);
+            // Enable and show the chart type selection button
+            document.getElementById('btn-select-chart').style.display = 'inline-block';
         };
         
         reader.readAsArrayBuffer(file);
@@ -90,14 +92,28 @@ function sortTableByColumn(data, columnIndex, order) {
     return [header, ...sortedRows];
 }
 
-function generateChart(data) {
+document.getElementById('btn-select-chart').addEventListener('click', function() {
+    $('#chartTypeModal').modal('show');
+});
+
+document.getElementById('btn-bar-chart').addEventListener('click', function() {
+    generateChart('bar');
+    $('#chartTypeModal').modal('hide');
+});
+
+document.getElementById('btn-pie-chart').addEventListener('click', function() {
+    generateChart('pie');
+    $('#chartTypeModal').modal('hide');
+});
+
+function generateChart(type) {
     const ctx = document.getElementById('chartContainer').getContext('2d');
-    
+
     // Example: Count of items per BU name
     const buNameCounts = {};
 
     // Assuming the "BU name" column is the 7th column (index 6)
-    data.slice(1).forEach(row => {
+    tableData.slice(1).forEach(row => {
         const buName = row[6];
         if (buName) {
             buNameCounts[buName] = (buNameCounts[buName] || 0) + 1;
@@ -107,22 +123,42 @@ function generateChart(data) {
     const buNames = Object.keys(buNameCounts);
     const buCounts = Object.values(buNameCounts);
 
-    const myChart = new Chart(ctx, {
-        type: 'bar',
+    new Chart(ctx, {
+        type: type,
         data: {
             labels: buNames,
             datasets: [{
                 label: '# of Products by BU',
                 data: buCounts,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: type === 'pie' ? 
+                    ['rgba(54, 162, 235, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(75, 192, 192, 0.2)'] : 
+                    ['rgba(54, 162, 235, 0.2)'],
+                borderColor: type === 'pie' ? 
+                    ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)'] : 
+                    ['rgba(54, 162, 235, 1)'],
                 borderWidth: 1
             }]
         },
         options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+            responsive: true,
+            maintainAspectRatio: false, // Allow the chart to be resized
+            plugins: {
+                legend: {
+                    display: true,
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.raw;
+                        }
+                    }
+                }
+            },
+            aspectRatio: type === 'pie' ? 1 : undefined, // Maintain circular aspect for pie chart
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10
                 }
             }
         }
