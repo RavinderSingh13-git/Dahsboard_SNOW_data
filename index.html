@@ -21,11 +21,11 @@
             justify-content: center;
             align-items: center;
         }
-        #barChart, #pieChart {
+        #barChart, #pieChart, #marketChart {
             width: 100% !important; /* Fill container width */
             height: 80% !important; /* Adjust height as needed */
         }
-        #pieChart {
+        #pieChart, #marketChart {
             display: none; /* Initially hidden */
         }
         .btn-chart-container {
@@ -35,6 +35,9 @@
         .btn-chart {
             margin: 0 10px; /* Adjust spacing between buttons */
         }
+        #input-market-excel {
+            display: none; /* Hide initially */
+        }
     </style>
 </head>
 <body>
@@ -43,11 +46,14 @@
 
         <!-- File input for Excel -->
         <input type="file" id="input-excel" class="form-control mb-4" accept=".xlsx, .xls">
-        
+        <!-- File input for Market Excel -->
+        <input type="file" id="input-market-excel" class="form-control mb-4" accept=".xlsx, .xls">
+
         <!-- Container for chart type selection buttons -->
         <div class="btn-chart-container text-center">
             <button id="btn-bar-chart" class="btn btn-info btn-chart">Bar Chart</button>
             <button id="btn-pie-chart" class="btn btn-info btn-chart">Pie Chart</button>
+            <button id="btn-compare-market" class="btn btn-warning btn-chart">Compare with Market Trend</button>
         </div>
 
         <!-- Bootstrap row to hold the table and chart -->
@@ -68,6 +74,7 @@
             <div class="col-md-6 chart-container">
                 <canvas id="barChart"></canvas>
                 <canvas id="pieChart"></canvas> <!-- Hidden initially -->
+                <canvas id="marketChart"></canvas> <!-- Hidden initially -->
             </div>
         </div>
     </div>
